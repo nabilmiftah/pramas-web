@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import CekKuotaBeranda from './components/CekKuotaBeranda';
 import CekKuota from './components/CekKuota';
+import Panduan from './components/Panduan';
 import JalurPendakian from './components/JalurPendakian';
 import Footer from './components/Footer';
 
@@ -22,6 +23,7 @@ function App() {
               </>
             } />
             <Route path="/cek-kuota" element={<CekKuota />} />
+            <Route path="/panduan" element={<Panduan />} />
             <Route path="/jalur" element={<JalurPendakian />} />
           </Routes>
         </main>

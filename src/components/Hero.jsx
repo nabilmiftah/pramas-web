@@ -1,11 +1,9 @@
-import bgGunung from '../assets/images/gunung-prau.jpg';
-
 const Hero = () => {
   return (
     <div
       className="relative w-full h-[500px] md:h-[600px] bg-cover bg-center flex items-center"
       style={{ 
-        backgroundImage: `url(${bgGunung})`
+        backgroundImage: "url('https://images.pexels.com/photos/2835562/pexels-photo-2835562.jpeg')"
       }}
     >
       {/* Overlay gelap agar teks putih tetap terbaca walaupun gambar latarnya terang */}
