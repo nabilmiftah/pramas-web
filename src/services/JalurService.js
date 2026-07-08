@@ -4,7 +4,7 @@ import BaseService from './BaseService.js';
 class JalurService extends BaseService {
   constructor() {
     // super() digunakan untuk mengirim nama tabel ke Class Induk (BaseService)
-    super('Jalur_Pendakian');
+    super('jalur_pendakian');
   }
 
   // Karena sudah menggunakan 'extends', class ini otomatis memiliki 
