@@ -1,4 +1,4 @@
-import bgGunung from '../assets/images/gunungPrau.png';
+import bgGunung from '../assets/images/gunung-prau.jpg';
 
 const Hero = () => {
   return (

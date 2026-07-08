@@ -1,22 +1,37 @@
+import { Link, useLocation } from 'react-router-dom';
+
 const Navbar = () => {
+  // useLocation digunakan untuk mengetahui kita sedang berada di URL mana
+  const location = useLocation();
+
+  // Fungsi dinamis untuk mengubah warna menu yang sedang aktif diklik
+  const isActive = (path) => {
+    return location.pathname === path 
+      ? "text-emerald-700 border-b-2 border-emerald-700 pb-1 font-semibold" 
+      : "text-gray-600 hover:text-emerald-700 transition duration-200";
+  };
+
   return (
-    <nav className="w-full bg-white py-4 px-8 flex justify-between items-center shadow-sm">
-      {/* Bagian Kiri: Logo */}
+    <nav className="w-full bg-white py-4 px-8 flex justify-between items-center shadow-md sticky top-0 z-50">
       <div className="text-2xl font-bold text-emerald-800 tracking-wide">
         PRAMAS
       </div>
 
-      {/* Bagian Tengah: Menu Navigasi */}
-      <ul className="hidden md:flex space-x-8 text-gray-600 font-medium text-sm">
-        <li className="hover:text-emerald-700 cursor-pointer">Beranda</li>
-        <li className="text-emerald-700 border-b-2 border-emerald-700 pb-1 cursor-pointer">
-          Cek Kuota
+      <ul className="hidden md:flex space-x-8 font-medium text-sm">
+        <li className={isActive('/')}>
+          <Link to="/">Beranda</Link>
         </li>
-        <li className="hover:text-emerald-700 cursor-pointer">Panduan</li>
-        <li className="hover:text-emerald-700 cursor-pointer">Jalur Pendakian</li>
+        <li className={isActive('/cek-kuota')}>
+          <Link to="/cek-kuota">Cek Kuota</Link>
+        </li>
+        <li className={isActive('/panduan')}>
+          <Link to="/panduan">Panduan</Link>
+        </li>
+        <li className={isActive('/jalur')}>
+          <Link to="/jalur">Jalur Pendakian</Link>
+        </li>
       </ul>
 
-      {/* Bagian Kanan: Tombol Login */}
       <div>
         <button className="bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-2 rounded-md font-medium transition duration-300">
           Login
