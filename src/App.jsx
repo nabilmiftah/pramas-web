@@ -6,6 +6,7 @@ import CekKuota from './components/CekKuota';
 import Panduan from './components/Panduan';
 import JalurPendakian from './components/JalurPendakian';
 import Footer from './components/Footer';
+import Login from './components/Login';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/cek-kuota" element={<CekKuota />} />
             <Route path="/panduan" element={<Panduan />} />
             <Route path="/jalur" element={<JalurPendakian />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </main>
         <Footer />
