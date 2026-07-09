@@ -8,26 +8,33 @@ const Login = () => {
   const [lihatSandi, setLihatSandi] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pesanError, setPesanError] = useState('');
-  
+  const [pesan, setPesan] = useState({ tipe: '', teks: '' });
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setPesanError('');
+    setPesan({ tipe: '', teks: '' });
 
-    // Memanggil fungsi login dari AuthService
+    // Memanggil fungsi login yang baru saja kita perbarui
     const response = await AuthService.login(email, password);
-    
+
     if (response.success) {
-      // Jika berhasil, arahkan pengguna kembali ke Beranda
-      navigate('/'); 
+      setPesan({ tipe: 'sukses', teks: `Selamat datang kembali, ${response.nama}! Mengalihkan...` });
+      
+      // Tunggu 1,5 detik agar pesan sukses terbaca, lalu arahkan berdasarkan ROLE
+      setTimeout(() => {
+        if (response.role === 'admin') {
+          navigate('/admin'); // Lempar ke Dashboard Admin
+        } else {
+          navigate('/dashboard'); // Lempar ke Dashboard Pendaki
+        }
+      }, 1500);
+
     } else {
-      // Jika gagal (salah password/email), tampilkan pesan error
-      setPesanError('Email atau kata sandi tidak valid. Silakan coba lagi.');
+      setPesan({ tipe: 'error', teks: response.pesan });
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (

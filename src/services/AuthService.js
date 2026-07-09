@@ -40,19 +40,39 @@ class AuthService {
     }
   }
 
-  // 2. Fungsi Login (Masuk)
+  // 2. Fungsi Login
   static async login(email, password) {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Tahap 1: Validasi keamanan (cek email dan sandi di brankas Supabase)
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
-      if (error) throw error;
-      return { success: true, data: data };
+      if (authError) throw authError;
+
+      // Tahap 2: Ambil data 'role' dari tabel 'pengguna' publik Anda
+      const { data: userData, error: dbError } = await supabase
+        .from('pengguna')
+        .select('role, nama_lengkap')
+        .eq('email', email)
+        .single(); // .single() digunakan karena email pasti unik (1 baris)
+
+      if (dbError) {
+        console.error("Gagal mengambil role pengguna:", dbError.message);
+      }
+
+      // Gabungkan data sesi dengan data role agar bisa dibaca oleh Login.jsx
+      return { 
+        success: true, 
+        user: authData.user,
+        role: userData ? userData.role : 'pendaki', // Default ke pendaki jika kosong
+        nama: userData ? userData.nama_lengkap : 'Pengguna'
+      };
+
     } catch (error) {
       console.error("Error saat Login:", error.message);
-      return { success: false, pesan: error.message };
+      return { success: false, pesan: "Email atau kata sandi tidak valid. Silakan coba lagi." };
     }
   }
 
