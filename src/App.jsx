@@ -7,6 +7,7 @@ import Panduan from './components/Panduan';
 import JalurPendakian from './components/JalurPendakian';
 import Footer from './components/Footer';
 import Login from './components/Login';
+import Register from './components/Register';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/panduan" element={<Panduan />} />
             <Route path="/jalur" element={<JalurPendakian />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </main>
         <Footer />

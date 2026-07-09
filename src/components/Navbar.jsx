@@ -33,9 +33,9 @@ const Navbar = () => {
       </ul>
 
       <div>
-        <button className="bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-2 rounded-md font-medium transition duration-300">
+        <Link to="/login" className="bg-[#0f291e] hover:bg-emerald-900 text-white px-6 py-2 rounded-md font-bold transition duration-300">
           Login
-        </button>
+        </Link>
       </div>
     </nav>
   );
