@@ -11,6 +11,7 @@ import Register from './components/Register';
 // route dashboard
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardPendaki from './components/DashboardPendaki';
+import DashboardAdmin from './components/DashboardAdmin';
 
 const PublicLayout = () => {
   return (
@@ -45,7 +46,7 @@ function App() {
         {/* GRUP 2: Halaman Terlindungi / Dashboard (Hanya menggunakan Sidebar, TANPA Navbar Utama) */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPendaki />} />
-          {/* Rute dashboard admin bisa ditambahkan di sini nantinya */}
+          <Route path="/admin" element={<DashboardAdmin />} />
         </Route>
 
       </Routes>
