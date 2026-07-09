@@ -13,6 +13,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import DashboardPendaki from './components/DashboardPendaki';
 import DashboardAdmin from './components/DashboardAdmin';
 import Bookings from './components/Bookings';
+import QuotaManagement from './components/QuotaManagement';
 
 const PublicLayout = () => {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPendaki />} />
           <Route path="/admin" element={<DashboardAdmin />} />
           <Route path="/bookings" element={<Bookings />} />
+          <Route path="/quota" element={<QuotaManagement />} />
         </Route>
 
       </Routes>
