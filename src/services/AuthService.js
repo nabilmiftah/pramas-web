@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient';
 
 class AuthService {
   // 1. Fungsi Registrasi (Daftar Akun Baru)
-  static async register(email, password, namaLengkap) {
+  static async register(email, password, namaLengkap, noTelepon) {
     try {
       // Langkah A: Daftarkan email & password ke sistem keamanan Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -19,11 +19,11 @@ class AuthService {
           .from('pengguna')
           .insert([
             {
-              // Menggunakan ID unik dari Supabase Auth agar saling terhubung
-              id: authData.user.id, 
+              nama_lengkap: namaLengkap,
               email: email,
-              nama: namaLengkap,
-              // Anda bisa menambahkan kolom lain seperti no_telepon di sini nanti
+              no_hp: noTelepon,
+              role: 'pendaki', // Otomatis menjadi pendaki saat mendaftar
+              password: 'ENCRYPTED_BY_AUTH'
             }
           ]);
           

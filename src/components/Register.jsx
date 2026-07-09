@@ -56,7 +56,8 @@ const Register = () => {
     const response = await AuthService.register(
       formData.email, 
       formData.password, 
-      formData.namaLengkap
+      formData.namaLengkap,
+      formData.noTelepon
     );
     
     if (response.success) {
