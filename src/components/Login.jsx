@@ -20,6 +20,9 @@ const Login = () => {
     const response = await AuthService.login(email, password);
 
     if (response.success) {
+      localStorage.setItem('role', response.role);
+      localStorage.setItem('userNama', response.nama);
+      
       setPesan({ tipe: 'sukses', teks: `Selamat datang kembali, ${response.nama}! Mengalihkan...` });
       
       // Tunggu 1,5 detik agar pesan sukses terbaca, lalu arahkan berdasarkan ROLE

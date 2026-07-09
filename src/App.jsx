@@ -12,6 +12,7 @@ import Register from './components/Register';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardPendaki from './components/DashboardPendaki';
 import DashboardAdmin from './components/DashboardAdmin';
+import Bookings from './components/Bookings';
 
 const PublicLayout = () => {
   return (
@@ -47,6 +48,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPendaki />} />
           <Route path="/admin" element={<DashboardAdmin />} />
+          <Route path="/bookings" element={<Bookings />} />
         </Route>
 
       </Routes>

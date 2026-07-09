@@ -13,6 +13,9 @@ const DashboardLayout = () => {
   const handleLogout = async () => {
     await AuthService.logout();
     
+    localStorage.removeItem('role');
+    localStorage.removeItem('userNama');
+    
     navigate('/login');
   };
   return (
