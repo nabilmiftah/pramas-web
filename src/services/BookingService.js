@@ -3,7 +3,7 @@ import BaseService from './BaseService.js';
 class BookingService extends BaseService {
   constructor() {
     // Mengirim nama tabel 'Booking_Transaksi' ke BaseService
-    super('Booking_Transaksi');
+    super('booking_transaksi');
   }
 
   // Method KHUSUS untuk menambahkan data booking baru (Insert)
