@@ -15,6 +15,8 @@ import DashboardAdmin from './components/DashboardAdmin';
 import Bookings from './components/Bookings';
 import QuotaManagement from './components/QuotaManagement';
 
+import Registration from './components/Registration';
+
 const PublicLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
@@ -52,6 +54,8 @@ function App() {
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/quota" element={<QuotaManagement />} />
         </Route>
+
+        <Route path="/registration" element={<Registration />} />
 
       </Routes>
     </Router>
