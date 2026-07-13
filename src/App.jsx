@@ -14,6 +14,7 @@ import DashboardPendaki from './components/DashboardPendaki';
 import DashboardAdmin from './components/DashboardAdmin';
 import Bookings from './components/Bookings';
 import QuotaManagement from './components/QuotaManagement';
+import CekKuotaPendaki from './components/CekKuotaPendaki';
 
 import Registration from './components/Registration';
 
@@ -53,6 +54,7 @@ function App() {
           <Route path="/admin" element={<DashboardAdmin />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/quota" element={<QuotaManagement />} />
+          <Route path="/jadwal-kuota" element={<CekKuotaPendaki />} />
         </Route>
 
         <Route path="/registration" element={<Registration />} />
