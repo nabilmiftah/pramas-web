@@ -16,6 +16,82 @@ const Registration = () => {
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
+  // State Langkah 1: Jalur dan Tanggal
+  const [bookingData, setBookingData] = useState({
+    jalur: 'Patak Banteng',
+    tanggal: ''
+  });
+
+  // State Langkah 2: Form Input Anggota Sementara
+  const [formAnggota, setFormAnggota] = useState({
+    nama: '',
+    nik: '',
+    telepon: '',
+    gender: ''
+  });
+
+  // State Langkah 2: Daftar Anggota yang Tersimpan
+  // Kita inisialisasi dengan data ketua dan anggota pertama agar sesuai dengan dataset
+  const [daftarAnggota, setDaftarAnggota] = useState([
+    { 
+      id: Date.now(), 
+      nama: 'Ridwan Shol', 
+      nik: '3301XXXXXXXX0001', 
+      telepon: '08123456789', 
+      gender: 'Perempuan', 
+      role: 'Ketua Rombongan' 
+    },
+    { 
+      id: Date.now() + 1, 
+      nama: 'Miftah', 
+      nik: '3301XXXXXXXX0002', 
+      telepon: '08129876543', 
+      gender: 'Perempuan', 
+      role: 'Anggota' 
+    }
+  ]);
+
+  // Fungsi untuk menangani input form anggota berubah
+  const handleInputAnggotaChange = (e) => {
+    const { name, value } = e.target;
+    setFormAnggota({
+      ...formAnggota,
+      [name]: value
+    });
+  };
+
+  // Fungsi untuk menambahkan anggota ke dalam tabel (Maksimal 8)
+  const handleAddAnggota = (e) => {
+    e.preventDefault();
+    if (daftarAnggota.length >= 8) {
+      alert('Batas maksimal 8 anggota telah tercapai.');
+      return;
+    }
+    
+    // Validasi sederhana agar form tidak kosong
+    if (!formAnggota.nama || !formAnggota.nik || !formAnggota.gender) {
+      alert('Mohon lengkapi data anggota.');
+      return;
+    }
+
+    const anggotaBaru = {
+      id: Date.now(),
+      ...formAnggota,
+      role: daftarAnggota.length === 0 ? 'Ketua Rombongan' : 'Anggota'
+    };
+
+    setDaftarAnggota([...daftarAnggota, anggotaBaru]);
+    
+    // Reset form setelah berhasil ditambah
+    setFormAnggota({ nama: '', nik: '', telepon: '', gender: '' });
+  };
+
+  // Fungsi untuk menghapus anggota dari tabel
+  const handleHapusAnggota = (id) => {
+    const filteredAnggota = daftarAnggota.filter(anggota => anggota.id !== id);
+    setDaftarAnggota(filteredAnggota);
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       
@@ -231,30 +307,57 @@ const Registration = () => {
                     <h3 className="text-xl font-bold text-gray-900">Tambah Anggota Rombongan</h3>
                     <span className="bg-[#eef8eb] text-emerald-800 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2 border border-[#d1e6cc]">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                      Slot: 2 / 8
+                      {/* Slot dinamis membaca panjang array */}
+                      Slot: {daftarAnggota.length} / 8
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
-                      <input type="text" placeholder="Sesuai Identitas" className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent text-sm" />
+                      <input 
+                        type="text" 
+                        name="nama"
+                        value={formAnggota.nama}
+                        onChange={handleInputAnggotaChange}
+                        placeholder="Sesuai Identitas" 
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent text-sm" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Identitas (KTP/Passport)</label>
-                      <input type="text" placeholder="16 Digit NIK atau No. Passport" className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent text-sm" />
+                      <input 
+                        type="text" 
+                        name="nik"
+                        value={formAnggota.nik}
+                        onChange={handleInputAnggotaChange}
+                        placeholder="16 Digit NIK atau No. Passport" 
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent text-sm" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Telepon</label>
-                      <input type="text" placeholder="Contoh: 08123456789" className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent text-sm" />
+                      <input 
+                        type="text" 
+                        name="telepon"
+                        value={formAnggota.telepon}
+                        onChange={handleInputAnggotaChange}
+                        placeholder="Contoh: 08123456789" 
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent text-sm" 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Jenis Kelamin</label>
                       <div className="relative">
-                        <select className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white text-gray-600 text-sm appearance-none">
-                          <option>Pilih Jenis Kelamin</option>
-                          <option>Laki-laki</option>
-                          <option>Perempuan</option>
+                        <select 
+                          name="gender"
+                          value={formAnggota.gender}
+                          onChange={handleInputAnggotaChange}
+                          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white text-gray-600 text-sm appearance-none"
+                        >
+                          <option value="">Pilih Jenis Kelamin</option>
+                          <option value="Laki-laki">Laki-laki</option>
+                          <option value="Perempuan">Perempuan</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -264,7 +367,10 @@ const Registration = () => {
                   </div>
 
                   <div className="flex justify-end">
-                    <button className="bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+                    <button 
+                      onClick={handleAddAnggota} 
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+                    >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                       Tambah ke Daftar
                     </button>
@@ -287,43 +393,42 @@ const Registration = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {/* Baris 1: Ketua */}
-                        <tr className="bg-white">
-                          <td className="p-4 pl-6">
-                            <div className="font-bold text-emerald-700">Zahlia Nisa Khanafi</div>
-                            <div className="text-xs text-gray-500 mt-0.5">Ketua Rombongan</div>
-                          </td>
-                          <td className="p-4 text-sm text-gray-600">3301XXXXXXXX0001</td>
-                          <td className="p-4">
-                            <span className="bg-[#eef8eb] text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">PEREMPUAN</span>
-                          </td>
-                          <td className="p-4 text-right pr-6 flex justify-end gap-3 mt-1">
-                            <button className="text-gray-400 hover:text-emerald-600 transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                            <button className="text-gray-400 hover:text-red-600 transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                          </td>
-                        </tr>
-                        {/* Baris 2: Anggota Tambahan */}
-                        <tr className="bg-white">
-                          <td className="p-4 pl-6">
-                            <div className="font-bold text-gray-900">Yuli</div>
-                            <div className="text-xs text-gray-500 mt-0.5">Anggota</div>
-                          </td>
-                          <td className="p-4 text-sm text-gray-600">3301XXXXXXXX0002</td>
-                          <td className="p-4">
-                            <span className="bg-[#eef8eb] text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">PEREMPUAN</span>
-                          </td>
-                          <td className="p-4 text-right pr-6 flex justify-end gap-3 mt-1">
-                            <button className="text-gray-400 hover:text-emerald-600 transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                            <button className="text-gray-400 hover:text-red-600 transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                          </td>
-                        </tr>
+                        {/* Rendering dinamis menggunakan map */}
+                        {daftarAnggota.map((anggota) => (
+                          <tr key={anggota.id} className="bg-white">
+                            <td className="p-4 pl-6">
+                              <div className={`font-bold ${anggota.role === 'Ketua Rombongan' ? 'text-emerald-700' : 'text-gray-900'}`}>
+                                {anggota.nama}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-0.5">{anggota.role}</div>
+                            </td>
+                            <td className="p-4 text-sm text-gray-600">{anggota.nik}</td>
+                            <td className="p-4">
+                              <span className="bg-[#eef8eb] text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{anggota.gender}</span>
+                            </td>
+                            <td className="p-4 text-right pr-6 flex justify-end gap-3 mt-1">
+                              {/* Ketua tidak boleh dihapus */}
+                              {anggota.role !== 'Ketua Rombongan' && (
+                                <button 
+                                  onClick={() => handleHapusAnggota(anggota.id)}
+                                  className="text-gray-400 hover:text-red-600 transition-colors"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
-                  <div className="bg-white p-8 text-center text-sm text-gray-400 font-semibold flex flex-col items-center justify-center gap-3 border-t border-gray-200">
-                    <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                    Silakan tambahkan anggota lainnya (maks. 8 orang)
-                  </div>
+                  {/* Pesan jika slot masih tersedia */}
+                  {daftarAnggota.length < 8 && (
+                    <div className="bg-white p-8 text-center text-sm text-gray-400 font-semibold flex flex-col items-center justify-center gap-3 border-t border-gray-200">
+                      <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                      Silakan tambahkan anggota lainnya (maks. 8 orang)
+                    </div>
+                  )}
                 </div>
 
               </div>
@@ -356,25 +461,34 @@ const Registration = () => {
                   <div className="mb-6">
                     <div className="flex justify-between text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wider">
                       <span>Kapasitas Kelompok</span>
-                      <span>25.0%</span>
+                      {/* Persentase kapasitas dinamis */}
+                      <span>{((daftarAnggota.length / 8) * 100).toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-[#a8c6a6] h-2 rounded-full" style={{ width: '25%' }}></div>
+                      {/* Bar progres dinamis */}
+                      <div 
+                        className="bg-[#a8c6a6] h-2 rounded-full transition-all duration-500" 
+                        style={{ width: `${(daftarAnggota.length / 8) * 100}%` }}
+                      ></div>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-sm text-emerald-700 font-semibold">
-                      <svg className="w-4 h-4 bg-emerald-700 text-white rounded-full p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                    <div className={`flex items-center gap-3 text-sm font-semibold ${daftarAnggota.length > 0 ? 'text-emerald-700' : 'text-gray-500'}`}>
+                      {daftarAnggota.length > 0 ? (
+                        <svg className="w-4 h-4 bg-emerald-700 text-white rounded-full p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                      ) : (
+                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                      )}
                       Ketua Rombongan Terdaftar
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                    <div className={`flex items-center gap-3 text-sm ${daftarAnggota.length >= 3 ? 'text-emerald-700 font-semibold' : 'text-gray-500'}`}>
+                      {daftarAnggota.length >= 3 ? (
+                        <svg className="w-4 h-4 bg-emerald-700 text-white rounded-full p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                      ) : (
+                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                      )}
                       Minimal 3 anggota (Opsional)
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
-                      Verifikasi ID terkumpul
                     </div>
                   </div>
                 </div>
@@ -435,116 +549,38 @@ const Registration = () => {
 
               </div>
 
-              {/* KOLOM KANAN: Daftar Anggota & Slot Upload (Porsi 2/3) */}
               <div className="lg:col-span-2 space-y-6">
-                
-                {/* Anggota 1 (Selesai/Terverifikasi) */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                  <div className="flex flex-wrap justify-between items-center mb-5 gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
+                {daftarAnggota.map((anggota) => (
+                  <div key={anggota.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold">
+                        {anggota.nama.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900 text-lg">Ahmad Fauzi</h4>
-                        <span className="bg-[#eef8eb] text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold mt-1 inline-block">Ketua Kelompok</span>
+                        <h4 className="font-bold text-gray-900 text-lg">{anggota.nama}</h4>
+                        <span className="text-xs text-gray-500">{anggota.role}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
-                      Profil Terverifikasi
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Dokumen 1 Selesai */}
-                    <div className="border-2 border-dashed border-emerald-200 bg-[#f4fbf6] rounded-xl p-4 flex items-center justify-between">
-                       <div className="flex items-center gap-3">
-                         <div className="bg-white p-2 rounded-lg shadow-sm text-emerald-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></div>
-                         <div>
-                           <div className="font-semibold text-sm text-gray-800">KTP_Ahmad.jpg</div>
-                           <div className="text-xs text-gray-500">1.2 MB • Berhasil</div>
-                         </div>
-                       </div>
-                       <div className="text-emerald-600"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
-                    </div>
-                    {/* Dokumen 2 Selesai */}
-                    <div className="border-2 border-dashed border-emerald-200 bg-[#f4fbf6] rounded-xl p-4 flex items-center justify-between">
-                       <div className="flex items-center gap-3">
-                         <div className="bg-white p-2 rounded-lg shadow-sm text-emerald-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
-                         <div>
-                           <div className="font-semibold text-sm text-gray-800">Sehat_Fauzi.pdf</div>
-                           <div className="text-xs text-gray-500">850 KB • Berhasil</div>
-                         </div>
-                       </div>
-                       <div className="text-emerald-600"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
-                    </div>
-                  </div>
-                </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Input KTP */}
+                      <label className="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-xl p-4 flex flex-col items-center justify-center gap-2 text-gray-500 cursor-pointer transition-colors">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span className="font-semibold text-sm">Unggah KTP {anggota.nama}</span>
+                        <input type="file" className="hidden" />
+                      </label>
 
-                {/* Anggota 2 (Menengah / Sedang Proses) */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                  <div className="flex flex-wrap justify-between items-center mb-5 gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 text-lg">Siti Aminah</h4>
-                        <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold mt-1 inline-block">Anggota 1</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-500">
-                      <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                      Menunggu Unggahan
+                      {/* Input Surat Sehat */}
+                      <label className="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-xl p-4 flex flex-col items-center justify-center gap-2 text-gray-500 cursor-pointer transition-colors">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span className="font-semibold text-sm">Unggah Surat Sehat</span>
+                        <input type="file" className="hidden" />
+                      </label>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* KTP Uploaded (Bisa Dihapus) */}
-                    <div className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-xl p-4 flex items-center justify-between">
-                       <div className="flex items-center gap-3">
-                         <div className="bg-white p-2 rounded-lg shadow-sm text-gray-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></div>
-                         <div>
-                           <div className="font-semibold text-sm text-gray-800">KTP_Siti.png</div>
-                           <div className="text-xs text-gray-500">1.5 MB • Berhasil</div>
-                         </div>
-                       </div>
-                       <button className="text-gray-400 hover:text-red-500 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                    </div>
-                    {/* Surat Sehat Kosong */}
-                    <button className="border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 transition-colors rounded-xl p-4 flex flex-col items-center justify-center gap-2 text-gray-500 h-full min-h-[80px]">
-                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                       <span className="font-semibold text-sm">Unggah Surat Sehat</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Anggota 3 (Belum Ada Upload) */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm opacity-75">
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-lg">Budi Hartono</h4>
-                      <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold mt-1 inline-block">Anggota 2</span>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button className="border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 transition-colors rounded-xl p-4 flex flex-col items-center justify-center gap-2 text-gray-500 min-h-[80px]">
-                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                       <span className="font-semibold text-sm">Unggah KTP/SIM</span>
-                    </button>
-                    <button className="border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 transition-colors rounded-xl p-4 flex flex-col items-center justify-center gap-2 text-gray-500 min-h-[80px]">
-                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                       <span className="font-semibold text-sm">Unggah Surat Sehat</span>
-                    </button>
-                  </div>
-                </div>
-
+                ))}
               </div>
+  
             </div>
             
             {/* Keamanan Data */}
