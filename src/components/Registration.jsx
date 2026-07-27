@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { SupabaseClient } from '@supabase/supabase-js';
+import BookingService from '../services/BookingService';
+import { useNavigate } from 'react-router-dom';
 
 const Registration = () => {
+  const navigate = useNavigate();
   // State untuk melacak pengguna berada di langkah ke berapa (1 - 4)
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -18,8 +22,9 @@ const Registration = () => {
 
   // State Langkah 1: Jalur dan Tanggal
   const [bookingData, setBookingData] = useState({
-    jalur: 'Patak Banteng',
-    tanggal: ''
+    id_jalur: 1, // Default ID Jalur (Misal: 1 untuk Patak Banteng)
+    tanggal_naik: '2026-08-15', // Format YYYY-MM-DD
+    tanggal_turun: '2026-08-16' // Format YYYY-MM-DD
   });
 
   // State Langkah 2: Form Input Anggota Sementara
@@ -105,6 +110,116 @@ const Registration = () => {
     }
   };
 
+  // State untuk mengontrol status loading saat proses submit berjalan
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleKonfirmasiBayar = async () => {
+    // 1. Validasi Syarat & Ketentuan (pastikan state checkbox sudah terhubung)
+    // if (!isSyaratDisetujui) {
+    //   alert("Mohon setujui Syarat & Ketentuan terlebih dahulu.");
+    //   return;
+    // }
+
+    setIsSubmitting(true);
+
+    try {
+      // 2. Generate ID Booking unik (Format: PRU-XXXXX)
+      const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const idBookingBaru = `PRU-${randomString}`;
+
+      // 3. Persiapkan array untuk menampung data anggota yang sudah difinalisasi
+      const daftarAnggotaFinal = [];
+
+      // 4. Proses Batch Upload File ke Supabase Storage
+      for (const anggota of daftarAnggota) {
+        let ktpUrl = null;
+        let sehatUrl = null;
+
+        // Upload KTP jika ada
+        if (anggota.fileKtp) {
+          const ktpPath = `${idBookingBaru}/KTP_${anggota.nama.replace(/\s+/g, '_')}`;
+          const { data: ktpData, error: ktpError } = await supabase.storage
+            .from('dokumen_pendaki') // Pastikan nama bucket ini sesuai di Supabase Anda
+            .upload(ktpPath, anggota.fileKtp);
+            
+          if (ktpError) throw ktpError;
+          
+          // Dapatkan Public URL
+          const { data: publicKtp } = supabase.storage.from('dokumen_pendaki').getPublicUrl(ktpPath);
+          ktpUrl = publicKtp.publicUrl;
+        }
+
+        // Upload Surat Sehat jika ada
+        if (anggota.fileSehat) {
+          const sehatPath = `${idBookingBaru}/SEHAT_${anggota.nama.replace(/\s+/g, '_')}`;
+          const { data: sehatData, error: sehatError } = await supabase.storage
+            .from('dokumen_pendaki')
+            .upload(sehatPath, anggota.fileSehat);
+            
+          if (sehatError) throw sehatError;
+
+          // Dapatkan Public URL
+          const { data: publicSehat } = supabase.storage.from('dokumen_pendaki').getPublicUrl(sehatPath);
+          sehatUrl = publicSehat.publicUrl;
+        }
+
+        // Gabungkan URL file ke dalam objek anggota
+        daftarAnggotaFinal.push({
+          ...anggota,
+          file_ktp: ktpUrl,
+          file_surat_sehat: sehatUrl
+        });
+      }
+
+      // 5. Susun Header Transaksi
+      // 5. Susun Header Transaksi
+      
+      // Kalkulasi biaya otomatis (Sesuai UI Langkah 4 Anda)
+      const biayaSimaksi = daftarAnggotaFinal.length * 25000;
+      const biayaFasilitas = 40000;
+      const adminSistem = 5000;
+      const totalBiaya = biayaSimaksi + biayaFasilitas + adminSistem;
+
+      // Ambil ID User yang sedang login (Sesuaikan dengan cara Anda menyimpan data user)
+      // Misalnya jika Anda menyimpannya di localStorage saat login:
+      const idUserAktif = localStorage.getItem('userId') || 1; // Angka 1 hanya sebagai fallback sementara (Hardcode)
+
+      const bookingHeader = {
+        id_booking: idBookingBaru,
+        
+        // Relasi
+        id_user: parseInt(idUserAktif), // Pastikan ini angka (integer)
+        id_jalur: parseInt(bookingData.id_jalur), // Pastikan ini angka (integer)
+        
+        // Tanggal (Sesuaikan dengan nama state dari Langkah 1 Anda)
+        tanggal_naik: bookingData.tanggal_naik, 
+        tanggal_turun: bookingData.tanggal_turun, 
+        
+        // Data Transaksi
+        jumlah_anggota: daftarAnggotaFinal.length,
+        total_biaya: totalBiaya,
+        status_pembayaran: 'pending',
+        status_pendakian: 'belum_berangkat'
+      };
+
+      // 6. Eksekusi ke Database via BookingService
+      const result = await BookingService.submitBooking(bookingHeader, daftarAnggotaFinal);
+
+      if (result.success) {
+        alert(`Registrasi Berhasil! Kode Booking Anda: ${idBookingBaru}`);
+        navigate('/jadwal-kuota');
+      } else {
+        throw new Error(result.error);
+      }
+
+    } catch (error) {
+      console.error("Gagal memproses pendaftaran:", error);
+      alert("Terjadi kesalahan sistem saat memproses registrasi Anda. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       
@@ -114,7 +229,15 @@ const Registration = () => {
           <svg className="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           PRAMAS
         </div>
-        <button className="text-gray-500 hover:text-gray-800 text-sm font-semibold flex items-center gap-2 transition-colors">
+        <button 
+          onClick={() => {
+            const konfirmasi = window.confirm("Apakah Anda yakin ingin membatalkan registrasi? Semua data yang telah diisi akan hilang.");
+            if (konfirmasi) {
+              navigate('/dashboard'); // Sesuaikan '/dashboard' dengan path rute Dasbor Anda
+            }
+          }}
+          className="text-gray-500 hover:text-gray-800 text-sm font-semibold flex items-center gap-2 transition-colors"
+        >
           Batal Registrasi
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
@@ -758,12 +881,24 @@ const Registration = () => {
           </button>
 
           <button 
-            onClick={nextStep}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-2.5 rounded-lg font-semibold transition-colors shadow-md flex items-center gap-2"
-          >
-            {currentStep === 4 ? 'Konfirmasi & Bayar' : 'Lanjutkan'}
-            {currentStep !== 4 && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>}
-          </button>
+              onClick={currentStep === 4 ? handleKonfirmasiBayar : nextStep}
+              disabled={isSubmitting}
+              className={`px-8 py-2.5 rounded-lg font-semibold transition-colors shadow-md flex items-center gap-2 ${
+                isSubmitting 
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                  : 'bg-emerald-700 hover:bg-emerald-800 text-white'
+              }`}
+            >
+              {isSubmitting 
+                ? 'Memproses...' 
+                : (currentStep === 4 ? 'Konfirmasi & Bayar' : 'Lanjutkan')
+              }
+              {currentStep !== 4 && (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              )}
+            </button>
         </div>
 
       </main>
