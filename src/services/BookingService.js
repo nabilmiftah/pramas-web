@@ -60,6 +60,32 @@ class BookingService extends BaseService {
       return { success: false, error: error.message };
     }
   }
+
+  async checkKuotaTersedia(idJalur, tanggalNaik) {
+    try {
+      const { data, error } = await this.db
+        .from('kuota_harian')
+        .select('sisa_kuota')
+        .eq('id_jalur', idJalur)
+        .eq('tanggal', tanggalNaik)
+        .single(); // Ambil 1 baris data saja
+
+      if (error) {
+        // Kode PGRST116 berarti "No Rows Found" (Data tidak ditemukan).
+        // Jika admin belum membuat data kuota di tanggal tersebut,
+        // kita asumsikan kuotanya masih kosong/utuh (Batas maksimal statis: 500).
+        if (error.code === 'PGRST116') {
+          return { success: true, sisa_kuota: 500 }; 
+        }
+        throw error;
+      }
+
+      return { success: true, sisa_kuota: data.sisa_kuota };
+    } catch (error) {
+      console.error("Gagal mengecek kuota:", error.message);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 export default new BookingService();
