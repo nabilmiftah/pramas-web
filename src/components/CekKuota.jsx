@@ -4,6 +4,9 @@ import KuotaService from '../services/KuotaService';
 const CekKuota = () => {
   const [loading, setLoading] = useState(true);
   const [dataKuota, setDataKuota] = useState([]);
+  
+  // 1. Tambahkan state untuk bulan yang dipilih (Default: Juli 2026 -> '2026-07')
+  const [selectedMonth, setSelectedMonth] = useState('2026-07');
 
   useEffect(() => {
     const fetchAndFormatData = async () => {
@@ -12,12 +15,16 @@ const CekKuota = () => {
         const rawData = await KuotaService.getKuotaDenganJalur();
         
         if (rawData) {
+          // 2. Saring data hanya untuk bulan yang sedang dipilih
+          // Kita gunakan startsWith karena format tanggal DB biasanya "2026-07-XX"
+          const filteredData = rawData.filter(item => item.tanggal.startsWith(selectedMonth));
+
           // Trik Logika: Mengelompokkan data berdasarkan tanggal (Pivot)
           const groupedData = {};
 
-          rawData.forEach(item => {
+          filteredData.forEach(item => {
             const tgl = item.tanggal;
-            // Mengambil nama jalur dari tabel relasi (pastikan properti ini sesuai dengan query Anda)
+            // Mengambil nama jalur dari tabel relasi
             const namaJalur = item.jalur_pendakian?.nama_jalur || 'Unknown'; 
             const kuota = item.sisa_kuota;
 
@@ -32,6 +39,10 @@ const CekKuota = () => {
 
           // Mengubah wadah objek menjadi array agar bisa di-map ke dalam tabel
           const formattedArray = Object.values(groupedData);
+          
+          // 3. Urutkan tanggal dari yang terawal hingga akhir bulan agar tabel rapi
+          formattedArray.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
           setDataKuota(formattedArray);
         }
       } catch (error) {
@@ -42,7 +53,7 @@ const CekKuota = () => {
     };
 
     fetchAndFormatData();
-  }, []);
+  }, [selectedMonth]); // 4. Masukkan state 'selectedMonth' sebagai dependency agar useEffect dipanggil ulang saat bulan diubah
 
   // Fungsi untuk mengubah format tanggal '2026-07-10' menjadi 'Jumat, 10 Jul 2026'
   const formatTanggal = (tglString) => {
@@ -53,12 +64,8 @@ const CekKuota = () => {
 
   // Logika tampilan badge status
   const renderBadge = (kuota) => {
-    // Jika data tidak ditemukan di database untuk jalur dan tanggal ini
     if (kuota === undefined || kuota === null) return <span className="text-gray-400 font-medium">-</span>;
-    
-    // Jika menggunakan -1 untuk status Tutup
     if (kuota < 0) return <span className="text-gray-500 font-medium">Tutup</span>;
-    
     if (kuota === 0) return <span className="bg-red-100 text-red-700 py-1 px-6 rounded font-bold">{kuota}</span>;
     if (kuota > 0 && kuota <= 20) return <span className="bg-yellow-100 text-yellow-800 py-1 px-6 rounded font-bold">{kuota}</span>;
     
@@ -77,10 +84,22 @@ const CekKuota = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div className="flex items-center space-x-3 mb-4 sm:mb-0">
           <label className="text-gray-600 font-medium text-sm">Bulan & Tahun</label>
-          <select className="border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option>Juli 2026</option>
-            <option>Agustus 2026</option>
+          
+          {/* 5. Ikat elemen select dengan state React */}
+          <select 
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="border border-gray-300 rounded-md px-4 py-2 text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            {/* Value disesuaikan dengan format "YYYY-MM" untuk kemudahan filter */}
+            <option value="2026-07">Juli 2026</option>
+            <option value="2026-08">Agustus 2026</option>
+            <option value="2026-09">September 2026</option>
+            <option value="2026-10">Oktober 2026</option>
+            <option value="2026-11">November 2026</option>
+            <option value="2026-12">Desember 2026</option>
           </select>
+
         </div>
 
         <div className="flex space-x-4 border border-gray-200 rounded-md px-4 py-2 bg-gray-50 text-sm">
@@ -113,7 +132,7 @@ const CekKuota = () => {
               </tr>
             ) : dataKuota.length === 0 ? (
               <tr>
-                <td colSpan="5" className="py-10 text-center text-gray-500">Data kuota belum tersedia untuk periode ini.</td>
+                <td colSpan="5" className="py-10 text-center text-gray-500">Data kuota belum tersedia untuk periode {selectedMonth}.</td>
               </tr>
             ) : (
               dataKuota.map((data, index) => (

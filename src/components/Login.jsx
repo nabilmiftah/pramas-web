@@ -7,35 +7,43 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [lihatSandi, setLihatSandi] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [pesanError, setPesanError] = useState('');
+  
+  // State tunggal untuk menangani pesan Sukses maupun Error
   const [pesan, setPesan] = useState({ tipe: '', teks: '' });
+  
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setPesan({ tipe: '', teks: '' });
+    setPesan({ tipe: '', teks: '' }); // Reset pesan setiap kali tombol ditekan
 
-    // Memanggil fungsi login yang baru saja kita perbarui
-    const response = await AuthService.login(email, password);
+    try {
+      const response = await AuthService.login(email, password);
 
-    if (response.success) {
-      localStorage.setItem('role', response.role);
-      localStorage.setItem('userNama', response.nama);
-      
-      setPesan({ tipe: 'sukses', teks: `Selamat datang kembali, ${response.nama}! Mengalihkan...` });
-      
-      // Tunggu 1,5 detik agar pesan sukses terbaca, lalu arahkan berdasarkan ROLE
-      setTimeout(() => {
-        if (response.role === 'admin') {
-          navigate('/admin'); // Lempar ke Dashboard Admin
-        } else {
-          navigate('/dashboard'); // Lempar ke Dashboard Pendaki
-        }
-      }, 1500);
+      if (response.success) {
+        localStorage.setItem('role', response.role);
+        localStorage.setItem('userNama', response.nama);
+        
+        // 1. Tampilkan notifikasi hijau sukses
+        setPesan({ tipe: 'sukses', teks: `Selamat datang kembali, ${response.nama}! Mengalihkan...` });
+        
+        // 2. Tunggu 1,5 detik, lalu arahkan
+        setTimeout(() => {
+          if (response.role === 'admin') {
+            navigate('/admin'); 
+          } else {
+            navigate('/dashboard'); 
+          }
+        }, 1500);
 
-    } else {
-      setPesan({ tipe: 'error', teks: response.pesan });
+      } else {
+        // 3. Tampilkan notifikasi merah error dari Supabase/AuthService
+        setPesan({ tipe: 'error', teks: response.pesan || 'Email atau kata sandi tidak valid.' });
+        setLoading(false);
+      }
+    } catch (error) {
+      setPesan({ tipe: 'error', teks: 'Terjadi kesalahan jaringan. Silakan coba lagi.' });
       setLoading(false);
     }
   };
@@ -43,12 +51,11 @@ const Login = () => {
   return (
     <div className="flex flex-col md:flex-row min-h-[calc(100vh-80px)] w-full">
       
-      {/* Kolom Kiri: Gambar Pemandangan (Disembunyikan di layar HP) */}
+      {/* Kolom Kiri: Gambar Pemandangan */}
       <div 
         className="hidden md:flex w-1/2 relative bg-cover bg-center" 
         style={{ backgroundImage: "url('https://images.pexels.com/photos/35725156/pexels-photo-35725156.jpeg')" }}
       >
-        {/* Gradient overlay agar teks terbaca */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
         
         <div className="relative z-10 flex flex-col justify-end p-12 lg:p-20 h-full text-white w-full">
@@ -65,10 +72,19 @@ const Login = () => {
           <h2 className="text-3xl font-bold text-[#0f291e] mb-2">Selamat Datang Kembali</h2>
           <p className="text-gray-500 mb-8 text-sm">Silakan masuk ke akun manajemen pendakian Anda untuk melanjutkan akses.</p>
 
-          {/* Menampilkan pesan error jika login gagal */}
-          {pesanError && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-6 text-sm border border-red-100">
-              {pesanError}
+          {/* AREA NOTIFIKASI DINAMIS (Hijau untuk sukses, Merah untuk error) */}
+          {pesan.teks && (
+            <div className={`p-4 rounded-md mb-6 text-sm font-semibold flex items-center shadow-sm ${
+              pesan.tipe === 'sukses' 
+                ? 'bg-[#eef8eb] text-emerald-800 border border-[#d1e6cc]' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {pesan.tipe === 'sukses' ? (
+                <svg className="w-5 h-5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              ) : (
+                <svg className="w-5 h-5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              )}
+              <span>{pesan.teks}</span>
             </div>
           )}
 
