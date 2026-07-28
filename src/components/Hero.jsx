@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Hero = () => {
   return (
     <div
@@ -24,21 +26,28 @@ const Hero = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-          <button className="bg-emerald-700 hover:bg-emerald-600 text-white px-6 py-3 rounded-md font-medium transition duration-300 flex items-center justify-center">
+          <Link 
+            to="/registration" 
+            className="bg-emerald-700 hover:bg-emerald-600 text-white px-6 py-3 rounded-md font-medium transition duration-300 flex items-center justify-center"
+          >
             {/* Ikon User */}
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
             Registrasi Sekarang
-          </button>
+          </Link>
           
-          <button className="bg-transparent border border-white hover:bg-white/20 text-white px-6 py-3 rounded-md font-medium transition duration-300 flex items-center justify-center">
+          {/* Tombol Panduan diubah menjadi Link */}
+          <Link 
+            to="/panduan" 
+            className="bg-transparent border border-white hover:bg-white/20 text-white px-6 py-3 rounded-md font-medium transition duration-300 flex items-center justify-center"
+          >
             {/* Ikon Buku/Panduan */}
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
             Pelajari Panduan
-          </button>
+          </Link>
         </div>
       </div>
     </div>

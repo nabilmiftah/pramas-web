@@ -5,34 +5,28 @@ const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 1. Ambil role pengguna yang sedang login dari localStorage
+  // 1. Ambil role pengguna
   const userRole = localStorage.getItem('role');
 
   const targetDashboardPath = userRole === 'admin' ? '/admin' : '/dashboard';
+  const targetQuotaPath = userRole === 'admin' ? '/jadwal-kuota' : '/quota';
 
-  // 2. Tentukan rute dinamis: jika admin ke '/quota', selain itu ke '/jadwal-kuota'
-  const targetQuotaPath = userRole === 'admin' ? '/quota' : '/jadwal-kuota';
-
-  // Fungsi kecil untuk mengecek apakah menu sedang aktif (di-klik)
-  const isAktif = (path) => {
-    return location.pathname.includes(path);
-  };
+  const isAktif = (path) => location.pathname.includes(path);
 
   const handleLogout = async () => {
-    await AuthService.logout();
-    
+    // await AuthService.logout(); // Asumsi AuthService sudah benar
     localStorage.removeItem('role');
     localStorage.removeItem('userNama');
-    
+    // Jika Anda menyimpan session ID/token, hapus juga di sini
     navigate('/login');
   };
+
   return (
     <div className="flex h-screen bg-[#f9fafc] font-sans">
       
       {/* Sidebar (Sisi Kiri) */}
       <aside className="w-64 bg-[#fbfcfc] border-r border-gray-200 flex flex-col justify-between hidden md:flex">
         
-        {/* Bagian Atas Sidebar */}
         <div>
           {/* Logo PRAMAS */}
           <div className="px-6 pt-8 pb-6">
@@ -40,18 +34,21 @@ const DashboardLayout = () => {
             <p className="text-xs text-gray-500 font-medium">Mountain Management</p>
           </div>
 
-          {/* Tombol Aksi Utama */}
-          <div className="px-6 mb-6">
-            <Link 
-              to="/registration"
-              className="w-full bg-[#0f291e] hover:bg-emerald-900 text-white text-sm font-semibold py-2.5 px-4 rounded-md transition duration-300 flex items-center justify-center"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              New Registration
-            </Link>
-          </div>
+          {/* Tombol Aksi Utama (Hanya Tampil Untuk Pendaki) */}
+          {userRole !== 'admin' && (
+            <div className="px-6 mb-6">
+              <Link 
+                to="/registration"
+                className="w-full bg-[#0f291e] hover:bg-emerald-900 text-white text-sm font-semibold py-2.5 px-4 rounded-md transition duration-300 flex items-center justify-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                New Registration
+              </Link>
+            </div>
+          )}
+
           {/* Menu Navigasi Utama */}
           <nav className="px-4 space-y-1">
             <Link 
@@ -75,9 +72,10 @@ const DashboardLayout = () => {
             </Link>
 
             <Link 
-              to="/quota"
+              // PERBAIKAN: Gunakan variabel dinamis, bukan hardcode "/quota"
+              to={targetQuotaPath}
               className={`flex items-center px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${
-                isAktif('/quota') ? 'bg-[#b8f2c3] text-[#0f291e]' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                isAktif(targetQuotaPath) ? 'bg-[#b8f2c3] text-[#0f291e]' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,14 +83,6 @@ const DashboardLayout = () => {
               </svg>
               Quota Management
             </Link>
-
-            {/* Menu Hiker Tracking dinonaktifkan sementara sesuai permintaan */}
-            {/* 
-            <Link to="/tracking" className="flex items-center px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors">
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-              Hiker Tracking
-            </Link>
-            */}
           </nav>
         </div>
 
@@ -118,9 +108,7 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      {/* Area Konten Utama (Ruang Kosong untuk Dashboard Pendaki/Admin) */}
       <main className="flex-1 overflow-y-auto p-8 md:p-12">
-        {/* <Outlet /> adalah tempat komponen halaman aktual (Dashboard Pendaki atau Admin) akan disisipkan */}
         <Outlet /> 
       </main>
 
