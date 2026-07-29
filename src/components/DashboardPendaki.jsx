@@ -10,10 +10,11 @@ const DashboardPendaki = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Ambil nama user dari LocalStorage (disimpan saat login)
+    // 1. Ambil data dari LocalStorage
     const storedName = localStorage.getItem('userNama');
+    const storedUserId = localStorage.getItem('userId') || 1; // Ambil ID User
+    
     if (storedName) {
-      // Ambil nama depan saja untuk sapaan
       setNamaUser(storedName.split(' ')[0]); 
     }
 
@@ -23,29 +24,28 @@ const DashboardPendaki = () => {
       try {
         const today = new Date().toISOString().split('T')[0];
 
-        // A. Ambil 1 Tiket Mendatang Terdekat (Tanggal >= Hari Ini)
-        // Asumsi: Anda membedakan data berdasarkan kolom 'nama_ketua'
+        // A. Ambil 1 Tiket Mendatang Terdekat
         const { data: upcomingData, error: upcomingError } = await supabase
           .from('booking_transaksi')
-          .select(`*, jalur_pendakian(nama_jalur)`) // Join ke tabel jalur jika ada
-          .eq('nama_ketua', storedName) // Filter milik user yang sedang login
+          .select(`*, jalur_pendakian(nama_jalur)`) 
+          .eq('id_user', storedUserId) // UBAH FILTER MENGGUNAKAN id_user
           .gte('tanggal_naik', today)
           .order('tanggal_naik', { ascending: true })
           .limit(1)
-          .single(); // Hanya ambil 1 yang paling dekat
+          .single(); 
 
         if (!upcomingError && upcomingData) {
           setTiketMendatang(upcomingData);
         }
 
-        // B. Ambil Riwayat Pendakian (Tanggal < Hari Ini)
+        // B. Ambil Riwayat Pendakian
         const { data: historyData, error: historyError } = await supabase
           .from('booking_transaksi')
           .select(`*, jalur_pendakian(nama_jalur)`)
-          .eq('nama_ketua', storedName)
+          .eq('id_user', storedUserId) // UBAH FILTER MENGGUNAKAN id_user
           .lt('tanggal_naik', today)
           .order('tanggal_naik', { ascending: false })
-          .limit(3); // Ambil 3 riwayat terakhir
+          .limit(3); 
 
         if (!historyError && historyData) {
           setRiwayatPendakian(historyData);
@@ -58,7 +58,7 @@ const DashboardPendaki = () => {
       }
     };
 
-    if (storedName) {
+    if (storedUserId) {
       fetchDashboardData();
     } else {
       setIsLoading(false);

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookingService from '../services/BookingService';
-// Pastikan path supabase ini sesuai dengan lokasi file supabaseClient.js Anda
 import { supabase } from '../services/supabaseClient'; 
 
 const Registration = () => {
@@ -16,7 +15,6 @@ const Registration = () => {
     { num: 4, title: 'Review & Bayar' }
   ];
 
-  // Helper untuk nama jalur di ringkasan
   const namaJalurMap = {
     1: 'Patak Banteng',
     2: 'Dieng',
@@ -24,31 +22,26 @@ const Registration = () => {
     4: 'Dwarawati'
   };
 
-  // State Langkah 1: Jalur dan Tanggal (Sudah Dinamis)
   const [bookingData, setBookingData] = useState({
     id_jalur: 1, 
     tanggal_naik: '', 
     tanggal_turun: '' 
   });
 
-  // State Langkah 2: Form Input Anggota Sementara
+  // --- PERUBAHAN UTAMA ADA DI SINI ---
+  // Mengambil nama user dari sistem penyimpanan lokal
+  const namaUserAktif = localStorage.getItem('userNama') || '';
+
+  // Form input akan langsung terisi dengan nama user yang login
   const [formAnggota, setFormAnggota] = useState({
-    nama: '', nik: '', telepon: '', gender: ''
+    nama: namaUserAktif, nik: '', telepon: '', gender: ''
   });
 
-  // State Langkah 2: Daftar Anggota yang Tersimpan
-  const [daftarAnggota, setDaftarAnggota] = useState([
-    { 
-      id: Date.now(), 
-      nama: 'Ridwan Shol', 
-      nik: '3301XXXXXXXX0001', 
-      telepon: '08123456789', 
-      gender: 'Laki - laki', 
-      role: 'Ketua Rombongan' 
-    }
-  ]);
+  // Tabel daftar anggota dikosongkan secara default agar user bisa 
+  // menginput data KTP dan No HP yang valid untuk dirinya sendiri.
+  const [daftarAnggota, setDaftarAnggota] = useState([]);
+  // -----------------------------------
 
-  // --- FUNGSI NAVIGASI & VALIDASI ---
   const nextStep = () => {
     if (currentStep === 1) {
       if (!bookingData.tanggal_naik || !bookingData.tanggal_turun) {
@@ -67,7 +60,6 @@ const Registration = () => {
   
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  // --- FUNGSI LANGKAH 2 & 3 ---
   const handleInputAnggotaChange = (e) => {
     const { name, value } = e.target;
     setFormAnggota({ ...formAnggota, [name]: value });
@@ -87,10 +79,13 @@ const Registration = () => {
     const anggotaBaru = {
       id: Date.now(),
       ...formAnggota,
+      // Orang pertama yang diinput otomatis menjadi Ketua Rombongan
       role: daftarAnggota.length === 0 ? 'Ketua Rombongan' : 'Anggota'
     };
 
     setDaftarAnggota([...daftarAnggota, anggotaBaru]);
+    
+    // Setelah ditambah, kosongkan semua form agar siap untuk anggota selanjutnya
     setFormAnggota({ nama: '', nik: '', telepon: '', gender: '' });
   };
 
@@ -111,7 +106,6 @@ const Registration = () => {
     }
   };
 
-  // --- FUNGSI SUBMIT TRANSAKSI (LANGKAH 4) ---
   const handleKonfirmasiBayar = async () => {
     setIsSubmitting(true);
 
@@ -159,6 +153,8 @@ const Registration = () => {
       const totalBiaya = biayaSimaksi + biayaFasilitas + adminSistem;
 
       const idUserAktif = localStorage.getItem('userId') || 1; 
+      // Mengambil nama ketua murni dari data tabel pertama (Ketua Rombongan)
+      const namaKetuaAsli = daftarAnggotaFinal[0]?.nama || namaUserAktif;
 
       const bookingHeader = {
         id_booking: idBookingBaru,
@@ -333,7 +329,6 @@ const Registration = () => {
 
         {currentStep === 2 && (
           <div className="animate-fade-in">
-            {/* (Kode Langkah 2 Anda Sama Persis, Tidak Ada Yang Diubah) */}
             <h2 className="text-2xl font-bold text-[#0f291e] mb-6">Data Anggota Rombongan</h2>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
@@ -348,7 +343,7 @@ const Registration = () => {
                       <input type="text" name="nama" value={formAnggota.nama} onChange={handleInputAnggotaChange} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Identitas</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Identitas (NIK)</label>
                       <input type="text" name="nik" value={formAnggota.nik} onChange={handleInputAnggotaChange} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm" />
                     </div>
                     <div>
@@ -377,18 +372,24 @@ const Registration = () => {
                         <tr className="bg-[#eef2f6] text-gray-500 text-[10px] font-bold uppercase"><th className="p-4 pl-6">Nama</th><th className="p-4">NIK</th><th className="p-4">Gender</th><th className="p-4 text-right">Aksi</th></tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {daftarAnggota.map((anggota) => (
-                          <tr key={anggota.id} className="bg-white">
-                            <td className="p-4 pl-6"><div className="font-bold">{anggota.nama}</div><div className="text-xs text-gray-500">{anggota.role}</div></td>
-                            <td className="p-4 text-sm text-gray-600">{anggota.nik}</td>
-                            <td className="p-4"><span className="bg-[#eef8eb] text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{anggota.gender}</span></td>
-                            <td className="p-4 text-right">
-                              {anggota.role !== 'Ketua Rombongan' && (
-                                <button onClick={() => handleHapusAnggota(anggota.id)} className="text-red-500 font-bold text-xs">Hapus</button>
-                              )}
-                            </td>
+                        {daftarAnggota.length === 0 ? (
+                          <tr>
+                            <td colSpan="4" className="p-8 text-center text-gray-400 text-sm font-medium">Belum ada anggota. Silakan tambah anggota pertama (Ketua Rombongan).</td>
                           </tr>
-                        ))}
+                        ) : (
+                          daftarAnggota.map((anggota) => (
+                            <tr key={anggota.id} className="bg-white">
+                              <td className="p-4 pl-6"><div className="font-bold">{anggota.nama}</div><div className="text-xs text-gray-500">{anggota.role}</div></td>
+                              <td className="p-4 text-sm text-gray-600">{anggota.nik}</td>
+                              <td className="p-4"><span className="bg-[#eef8eb] text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">{anggota.gender}</span></td>
+                              <td className="p-4 text-right">
+                                {anggota.role !== 'Ketua Rombongan' && (
+                                  <button onClick={() => handleHapusAnggota(anggota.id)} className="text-red-500 font-bold text-xs hover:underline">Hapus</button>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -407,7 +408,6 @@ const Registration = () => {
 
         {currentStep === 3 && (
           <div className="animate-fade-in">
-            {/* (Kode Langkah 3 Anda Sama Persis, Tidak Ada Yang Diubah) */}
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-[#0f291e] mb-3">Verifikasi Identitas & Kesehatan</h2>
             </div>
@@ -423,11 +423,11 @@ const Registration = () => {
                   <div key={anggota.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                     <h4 className="font-bold text-gray-900 text-lg mb-4">{anggota.nama} ({anggota.role})</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <label className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center cursor-pointer">
+                      <label className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center cursor-pointer hover:bg-gray-50">
                         <span className="font-semibold text-sm text-center text-gray-500 mb-2">{anggota.fileKtp ? anggota.fileKtp.name : `Unggah KTP`}</span>
                         <input type="file" accept=".jpg,.jpeg,.png,.pdf" className="hidden" onChange={(e) => handleFileChange(anggota.id, 'fileKtp', e.target.files[0])}/>
                       </label>
-                      <label className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center cursor-pointer">
+                      <label className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center cursor-pointer hover:bg-gray-50">
                         <span className="font-semibold text-sm text-center text-gray-500 mb-2">{anggota.fileSehat ? anggota.fileSehat.name : 'Unggah Surat Sehat'}</span>
                         <input type="file" accept=".jpg,.jpeg,.png,.pdf" className="hidden" onChange={(e) => handleFileChange(anggota.id, 'fileSehat', e.target.files[0])}/>
                       </label>
