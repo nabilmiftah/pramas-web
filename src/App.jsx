@@ -17,6 +17,7 @@ import Bookings from './components/Bookings';
 import QuotaManagement from './components/QuotaManagement';
 import CekKuotaPendaki from './components/CekKuotaPendaki';
 import Registration from './components/Registration';
+import BookingDetail from './components/BookingDetail';
 
 // --- KOMPONEN PUBLIC LAYOUT ---
 const PublicLayout = () => {
@@ -84,6 +85,7 @@ function App() {
           {/* Rute Bersama (Bisa diakses Admin & Pendaki) */}
           <Route element={<ProtectedRoute allowedRoles={['admin', 'pendaki']} />}>
             <Route path="/bookings" element={<Bookings />} />
+            <Route path="/booking-detail/:id" element={<BookingDetail />} />
           </Route>
 
         </Route>

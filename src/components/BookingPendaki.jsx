@@ -109,7 +109,7 @@ const BookingPendaki = () => {
                 ) : b.status_pembayaran?.toLowerCase() === 'pending' ? (
                   <button 
                     onClick={() => navigate(`/pembayaran/${b.id_booking}`)}
-                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 text-sm font-bold py-2.5 rounded-xl transition-colors"
+                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-white-900 text-sm font-bold py-2.5 rounded-xl transition-colors"
                   >
                     Bayar
                   </button>
