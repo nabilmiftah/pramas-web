@@ -33,7 +33,11 @@ const BookingPendaki = () => {
 
   const filteredBookings = bookings.filter(booking => {
     if (filterAktif === 'Semua') return true;
-    if (filterAktif === 'Menunggu Pembayaran') return booking.status_pembayaran?.toLowerCase() === 'pending';
+    if (filterAktif === 'Menunggu Pembayaran') {
+      const s = booking.status_pembayaran?.toLowerCase();
+      // Tampilkan tiket yang pending DAN yang sedang menunggu verifikasi di tab ini
+      return s === 'pending' || s === 'menunggu verifikasi'; 
+    }
     if (filterAktif === 'Disetujui') return booking.status_pembayaran?.toLowerCase() === 'lunas';
     return true;
   });
@@ -41,6 +45,10 @@ const BookingPendaki = () => {
   const getStatusBadge = (status) => {
     const s = status?.toLowerCase() || 'pending';
     if (s === 'lunas') return <span className="bg-[#eef8eb] text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-[#d1e6cc]">Disetujui</span>;
+    
+    // Tambahkan baris ini untuk status Menunggu Verifikasi (Warna Biru)
+    if (s === 'menunggu verifikasi') return <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">Menunggu Verifikasi</span>;
+    
     if (s === 'dibatalkan') return <span className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-100">Dibatalkan</span>;
     return <span className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200">Menunggu Pembayaran</span>;
   };
@@ -87,7 +95,7 @@ const BookingPendaki = () => {
               </div>
               <div className="mb-6 flex-grow">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Gunung Prau</h3>
-                <p className="text-gray-500 text-sm font-medium">Jalur {b.jalur_pendakian?.nama_jalur || b.id_jalur}</p>
+                <p className="text-gray-500 text-sm font-medium"> {b.jalur_pendakian?.nama_jalur || b.id_jalur}</p>
               </div>
               <div className="grid grid-cols-2 gap-4 border-t border-b border-gray-100 py-4 mb-6">
                 <div>
