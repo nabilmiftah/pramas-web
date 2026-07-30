@@ -19,6 +19,7 @@ import CekKuotaPendaki from './components/CekKuotaPendaki';
 import Registration from './components/Registration';
 import BookingDetail from './components/BookingDetail';
 import BookingPayment from './components/BookingPayment';
+import ETicket from './components/ETicket';
 
 // --- KOMPONEN PUBLIC LAYOUT ---
 const PublicLayout = () => {
@@ -88,6 +89,7 @@ function App() {
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/booking-detail/:id" element={<BookingDetail />} />
             <Route path="/pembayaran/:id" element={<BookingPayment />} />
+            <Route path="/e-tiket/:id" element={<ETicket />} />
           </Route>
 
         </Route>
