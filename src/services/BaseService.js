@@ -1,3 +1,4 @@
+
 import { supabase } from './supabaseClient.js';
 
 // Ini adalah implementasi "Class" dalam OOP
