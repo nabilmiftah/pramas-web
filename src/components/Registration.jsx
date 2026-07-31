@@ -110,6 +110,33 @@ const Registration = () => {
     setIsSubmitting(true);
 
     try {
+      // ==========================================
+      // LANGKAH 1: CEK SISA KUOTA SEBELUM PROSES LAINNYA
+      // ==========================================
+      const { data: kuotaData, error: cekError } = await supabase
+        .from('kuota_harian')
+        .select('id_kuota, sisa_kuota')
+        .eq('tanggal', bookingData.tanggal_naik)
+        .eq('id_jalur', parseInt(bookingData.id_jalur))
+        .single(); // Ambil 1 baris spesifik
+
+      // Jika admin belum mengatur kuota untuk tanggal tersebut
+      if (cekError || !kuotaData) {
+        alert("Sistem belum membuka kuota untuk tanggal tersebut. Silakan pilih tanggal lain atau hubungi admin.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Jika kuota kurang dari jumlah anggota rombongan
+      if (kuotaData.sisa_kuota < daftarAnggota.length) {
+        alert(`Maaf, kuota tidak mencukupi! Sisa kuota saat ini hanya: ${kuotaData.sisa_kuota} orang.`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // ==========================================
+      // PROSES UNGGAH DOKUMEN (Jika Kuota Aman)
+      // ==========================================
       const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
       const idBookingBaru = `PRU-${randomString}`;
       const daftarAnggotaFinal = [];
@@ -147,14 +174,15 @@ const Registration = () => {
         });
       }
 
+      // ==========================================
+      // SIMPAN DATA KE TABEL TRANSAKSI
+      // ==========================================
       const biayaSimaksi = daftarAnggotaFinal.length * 25000;
       const biayaFasilitas = 40000;
       const adminSistem = 5000;
       const totalBiaya = biayaSimaksi + biayaFasilitas + adminSistem;
 
       const idUserAktif = localStorage.getItem('userId') || 1; 
-      // Mengambil nama ketua murni dari data tabel pertama (Ketua Rombongan)
-      const namaKetuaAsli = daftarAnggotaFinal[0]?.nama || namaUserAktif;
 
       const bookingHeader = {
         id_booking: idBookingBaru,
@@ -171,6 +199,20 @@ const Registration = () => {
       const result = await BookingService.submitBooking(bookingHeader, daftarAnggotaFinal);
 
       if (result.success) {
+        // ==========================================
+        // LANGKAH 2: POTONG KUOTA HARIAN DI DATABASE
+        // ==========================================
+        const sisaKuotaBaru = kuotaData.sisa_kuota - daftarAnggotaFinal.length;
+        
+        const { error: updateKuotaError } = await supabase
+          .from('kuota_harian')
+          .update({ sisa_kuota: sisaKuotaBaru })
+          .eq('id_kuota', kuotaData.id_kuota);
+
+        if (updateKuotaError) {
+          console.error("Peringatan: Gagal memotong kuota secara otomatis.", updateKuotaError);
+        }
+
         alert(`Registrasi Berhasil! Kode Booking Anda: ${idBookingBaru}`);
         navigate('/dashboard'); 
       } else {

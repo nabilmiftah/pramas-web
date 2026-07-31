@@ -67,7 +67,11 @@ const BookingAdmin = () => {
       );
       
       setIsModalOpen(false);
-      alert(`Pesanan ${selectedBooking.id_booking} berhasil ${newStatus === 'Lunas' ? 'disetujui' : 'dibatalkan'}!`);
+     if (newStatus === 'lunas') {
+        alert(`Sukses! Pembayaran untuk pesanan ${selectedBooking.id_booking} telah diverifikasi dan E-Tiket berhasil diterbitkan.`);
+      } else {
+        alert(`Pesanan ${selectedBooking.id_booking} telah ditolak dan dibatalkan.`);
+      }
       
     } catch (error) {
       console.error("Gagal update status:", error.message);
